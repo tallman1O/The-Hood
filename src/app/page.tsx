@@ -1,12 +1,23 @@
 'use client'
+import MatrixText from "@/components/kokonutui/matrix-text";
 import { useUsername } from "@/hooks/use-username";
 
 export default function Home() {
   const { username } = useUsername();
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-4">
+    <main className="flex min-h-screen flex-col items-center justify-center p-4 bg-black">
       <div className="w-full max-w-md space-y-8">
+        <div className="text-center space-y-2">
+          <h1 className="text-2xl font-bold tracking-tight text-green-500">
+            <MatrixText 
+              text=">private_chat" 
+              letterInterval={80}
+              letterAnimationDuration={800} 
+            />
+          </h1>
+          <p className="text-zinc-500 text-sm">A private, self-destructing chat room.</p>
+        </div>
         <div className="border border-zinc-800 bg-zinc-900/50 p-6 backdrop-blur-md">
           <div className="space-y-5">
             <div className="space-y-2">
