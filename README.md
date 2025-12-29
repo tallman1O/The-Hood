@@ -128,7 +128,3 @@ src/
 - `DELETE /api/room` - Destroy a room
 - `POST /api/messages` - Send a message
 - `GET /api/messages` - Get all messages in a room
-
-## License
-
-This project is private and not licensed for public use.
