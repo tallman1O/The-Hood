@@ -65,7 +65,11 @@ function Lobby() {
 
         <div className="text-center space-y-2">
           <h1 className="text-2xl font-bold tracking-tight text-green-500">
-            <MatrixText text=">private_chat" letterAnimationDuration={800} letterInterval={8} />
+            <MatrixText 
+              text=">private_chat" 
+              letterInterval={80}
+              letterAnimationDuration={800} 
+            />
           </h1>
           <p className="text-zinc-500 text-sm">A private, self-destructing chat room.</p>
         </div>
