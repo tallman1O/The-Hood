@@ -27,7 +27,7 @@ A private, self-destructing chat room application built with Next.js. Create sec
 
 ## Prerequisites
 
-- Node.js 20 or higher
+- Bun runtime 
 - Upstash Redis account and credentials
 - Upstash Realtime access
 
@@ -35,15 +35,9 @@ A private, self-destructing chat room application built with Next.js. Create sec
 
 ### Installation
 
-Install dependencies using your preferred package manager:
+Install dependencies using Bun:
 
 ```bash
-npm install
-# or
-yarn install
-# or
-pnpm install
-# or
 bun install
 ```
 
@@ -63,12 +57,6 @@ You can obtain these credentials from your Upstash dashboard.
 Run the development server:
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
 bun dev
 ```
 
@@ -79,13 +67,13 @@ Open [http://localhost:3000](http://localhost:3000) in your browser to see the a
 Build the application:
 
 ```bash
-npm run build
+bun run build
 ```
 
 Start the production server:
 
 ```bash
-npm start
+bun start
 ```
 
 ## How It Works
