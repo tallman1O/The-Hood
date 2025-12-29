@@ -11,15 +11,19 @@
   "dependencies": {
     "@elysiajs/eden": "^1.4.6",
     "@tanstack/react-query": "^5.90.14",
+    "@upstash/realtime": "^1.0.0",
+    "@upstash/redis": "^1.36.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
+    "date-fns": "^4.1.0",
     "elysia": "^1.4.19",
     "lucide-react": "^0.562.0",
     "motion": "^12.23.26",
     "next": "16.1.1",
     "react": "19.2.3",
     "react-dom": "19.2.3",
-    "tailwind-merge": "^3.4.0"
+    "tailwind-merge": "^3.4.0",
+    "zod": "^4.2.1"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
