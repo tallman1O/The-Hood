@@ -17,7 +17,16 @@ export const metadata: Metadata = {
   openGraph: {
     title: "The Hood",
     description: "A private, self-destructing chat room application. Create secure rooms that automatically expire after 10 minutes, with real-time messaging and automatic message deletion.",
-    images: "/icon.svg",
+    type: "website",
+    url: "https://thehood-private.vercel.app",
+    images: [
+      {
+        url: "/icon.svg",
+        width: 1200,
+        height: 630,
+        alt: "The Hood",
+      }
+    ]
   },
 };
 
