@@ -99,10 +99,25 @@ const messages = new Elysia({ prefix: "/messages" })
     { query: z.object({ roomId: z.string() }) }
   )
 
-const app = new Elysia({ prefix: "/api" }).use(rooms).use(messages)
+const app = new Elysia({ prefix: "/api" })
+    .onBeforeHandle(({ request, set }) => {
+        const origin = request.headers.get("origin")
+        if (origin) {
+            set.headers["Access-Control-Allow-Origin"] = origin
+            set.headers["Access-Control-Allow-Methods"] = "GET, POST, DELETE, OPTIONS"
+            set.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization"
+            set.headers["Access-Control-Allow-Credentials"] = "true"
+        }
+    })
+    .options("*", () => {
+        return new Response(null, { status: 204 })
+    })
+    .use(rooms)
+    .use(messages)
 
 export const GET = app.fetch
 export const POST = app.fetch
 export const DELETE = app.fetch
+export const OPTIONS = app.fetch
 
 export type App = typeof app
