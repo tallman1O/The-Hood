@@ -11,6 +11,14 @@ const jetbrainsMono = JetBrains_Mono({
 export const metadata: Metadata = {
   title: "The Hood",
   description: "A private, self-destructing chat room application. Create secure rooms that automatically expire after 10 minutes, with real-time messaging and automatic message deletion.",
+  icons: {
+    icon: "/icon.svg",
+  },
+  openGraph: {
+    title: "The Hood",
+    description: "A private, self-destructing chat room application. Create secure rooms that automatically expire after 10 minutes, with real-time messaging and automatic message deletion.",
+    images: "/icon.svg",
+  },
 };
 
 export default function RootLayout({
