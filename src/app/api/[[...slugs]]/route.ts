@@ -38,62 +38,111 @@ const rooms = new Elysia({ prefix: "/room" })
         redis.del(auth.roomId),
         redis.del(`meta:${auth.roomId}`),
         redis.del(`messages:${auth.roomId}`),
+        redis.del(`keys:${auth.roomId}`),
+        redis.del(`participantIdByToken:${auth.roomId}`),
       ])
     },
     { query: z.object({ roomId: z.string() }) }
   )
+  .post(
+    "/keys",
+    async ({ body, auth }) => {
+      const roomExists = await redis.exists(`meta:${auth.roomId}`)
+      if (!roomExists) throw new Error("Room does not exist")
+
+      let participantId = await redis.hget<string>(`participantIdByToken:${auth.roomId}`, auth.token)
+      if (participantId) {
+        await redis.hset(`keys:${auth.roomId}`, { [participantId]: body.publicKey })
+      } else {
+        participantId = nanoid()
+        await redis.hset(`keys:${auth.roomId}`, { [participantId]: body.publicKey })
+        await redis.hset(`participantIdByToken:${auth.roomId}`, { [auth.token]: participantId })
+      }
+
+      const remaining = await redis.ttl(`meta:${auth.roomId}`)
+      await redis.expire(`keys:${auth.roomId}`, remaining)
+      await redis.expire(`participantIdByToken:${auth.roomId}`, remaining)
+
+      return { participantId }
+    },
+    {
+      query: z.object({ roomId: z.string() }),
+      body: z.object({ publicKey: z.string().min(1).max(500) }),
+    }
+  )
+  .get(
+    "/keys/me",
+    async ({ auth }) => {
+      const participantId = await redis.hget<string>(`participantIdByToken:${auth.roomId}`, auth.token)
+      if (!participantId) return { participantId: null as string | null }
+      return { participantId }
+    },
+    { query: z.object({ roomId: z.string() }) }
+  )
+  .get(
+    "/keys",
+    async ({ auth }) => {
+      const keys = await redis.hgetall<Record<string, string>>(`keys:${auth.roomId}`)
+      const participants = Object.entries(keys ?? {}).map(([id, publicKey]) => ({ id, publicKey }))
+      return { participants }
+    },
+    { query: z.object({ roomId: z.string() }) }
+  )
+
+const encryptedMessageBody = z.object({
+  sender: z.string().max(100),
+  encryptedContent: z.string(),
+  contentNonce: z.string(),
+  senderPublicKey: z.string(),
+  keys: z.record(
+    z.string(),
+    z.object({ nonce: z.string(), ciphertext: z.string() })
+  ),
+})
 
 const messages = new Elysia({ prefix: "/messages" })
   .use(authMiddleware)
   .post(
     "/",
     async ({ body, auth }) => {
-      const { sender, text } = body
       const { roomId } = auth
 
       const roomExists = await redis.exists(`meta:${roomId}`)
-
-      if (!roomExists) {
-        throw new Error("Room does not exist")
-      }
+      if (!roomExists) throw new Error("Room does not exist")
 
       const message: Message = {
         id: nanoid(),
-        sender,
-        text,
+        sender: body.sender,
         timestamp: Date.now(),
         roomId,
+        encryptedContent: body.encryptedContent,
+        contentNonce: body.contentNonce,
+        senderPublicKey: body.senderPublicKey,
+        keys: body.keys,
       }
 
-      // add message to history
       await redis.rpush(`messages:${roomId}`, { ...message, token: auth.token })
       await realtime.channel(roomId).emit("chat.message", message)
 
-      // housekeeping
       const remaining = await redis.ttl(`meta:${roomId}`)
-
       await redis.expire(`messages:${roomId}`, remaining)
-      await redis.expire(`history:${roomId}`, remaining)
       await redis.expire(roomId, remaining)
     },
     {
       query: z.object({ roomId: z.string() }),
-      body: z.object({
-        sender: z.string().max(100),
-        text: z.string().max(1000),
-      }),
+      body: encryptedMessageBody,
     }
   )
   .get(
     "/",
     async ({ auth }) => {
-      const messages = await redis.lrange<Message>(`messages:${auth.roomId}`, 0, -1)
+      const list = await redis.lrange<Message & { token?: string }>(`messages:${auth.roomId}`, 0, -1)
 
       return {
-        messages: messages.map((m) => ({
-          ...m,
-          token: m.token === auth.token ? auth.token : undefined,
-        })),
+        messages: list.map((m) => {
+          const { token: _t, ...rest } = m
+          return rest
+        }),
       }
     },
     { query: z.object({ roomId: z.string() }) }
